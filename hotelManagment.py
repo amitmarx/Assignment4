@@ -35,6 +35,7 @@ def main(args):
     with open(inputFileName) as inputFile:
         i = 0
         for line in inputFile:
+            line.strip()
             listLine = line.split(",")
             if listLine[0] == "room":
                 insert_Rooms(int(listLine[1]), cursor)
