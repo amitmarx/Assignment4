@@ -1,17 +1,39 @@
 import time
+import sqlite3
 
-def dohotelWork(taskname,parameter):
-    if(taskname="wakeup"):
-        sql = "SELECT firstname,lastname from Residents WHERE roomnumber ={0}".format(parameter)
-        output = "{0} {1} in room {3} received a wakeupcall at"
-    elif(taskname="breakfast"):
-        sql = "SELECT firstname,lastname from Residents WHERE roomnumber ={0}".format(parameter)
-        output = "{0} {1} in room {3} has been served breakfast at"
+dbcon = sqlite3.connect('cronhoteldb.db')
+cursor = dbcon.cursor()
+
+def dohoteltask(taskname,parameter):
+    if(taskname=="wakeup"):
+        sql = "SELECT FirstName,LastName from Residents WHERE RoomNumber=?"
+        cursor.execute(sql,(parameter,))
+        result = cursor.fetchone()+(parameter,)
+        output = "{0} {1} in room {2} received a wakeup call at".format(*result) 
+    elif(taskname=="breakfast"):
+        sql = "SELECT FirstName,LastName from Residents WHERE RoomNumber=?"
+        cursor.execute(sql,(parameter,))
+        result = cursor.fetchone()+(parameter,)
+        output = "{0} {1} in room {2} has been served breakfast at".format(*result)
+    
     else:
-        sql = """SELECT roomnumber FROM Rooms
-        LEFT JOIN Residents on Rooms.Roomnum = Residents.Roomnum
-        WHERE Residents.firstname is null"""
-        rooms = ', '.join()
-        output = "Rooms {0} were cleaned at".format(rooms)
-    print output+" " +str(time.time())
-        
+        sql = """SELECT Rooms.RoomNumber FROM Rooms
+        LEFT JOIN Residents on Rooms.RoomNumber = Residents.RoomNumber
+		WHERE Residents.FirstName is null"""
+        cursor.execute(sql)
+        rooms = cursor.fetchall()
+        roomsSplited = ', '.join([str(room[0]) for room in rooms])
+        output = "Rooms {0} were cleaned at".format(roomsSplited)
+
+    now = time.time()
+    print output+" " +str(now)
+
+    sql="""SELECT DoEvery, NumTimes from Tasks ta
+    JOIN TaskTimes tt on tt.TaskId = ta.TaskId
+    WHERE ta.TaskName = ? and ta.Parameter=?"""
+    cursor.execute(sql,(taskname,parameter))
+    (DoEvery,NumTimes) = cursor.fetchone()
+    if(NumTimes>1):
+        return now,now+DoEvery
+    else:
+        return now
