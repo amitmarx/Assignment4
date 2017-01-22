@@ -27,13 +27,4 @@ def dohoteltask(taskname,parameter):
 
     now = time.time()
     print output+" " +str(now)
-
-    sql="""SELECT DoEvery, NumTimes from Tasks ta
-    JOIN TaskTimes tt on tt.TaskId = ta.TaskId
-    WHERE ta.TaskName = ? and ta.Parameter=?"""
-    cursor.execute(sql,(taskname,parameter))
-    (DoEvery,NumTimes) = cursor.fetchone()
-    if(NumTimes>1):
-        return now,now+DoEvery
-    else:
-        return now
+    return now
