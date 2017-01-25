@@ -16,6 +16,7 @@ def main():
                 thisTime = hotelWorker.dohoteltask(name, param)
                 tasksLeft[task] = (id, name, param, doEvery, numTimes-1, thisTime+doEvery)
                 cursor.execute("""UPDATE TaskTimes SET NumTimes=? WHERE TaskId=?""", (numTimes-1, id,))
+                dbcon.commit()
         tasksLeft = [i for i in tasksLeft if i[4] != 0]
 
 
